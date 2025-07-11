@@ -3,384 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Mathematical Interactives - Interactive Learning Tools</title>
+    <title>HTML Mathematical Interactives</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
             line-height: 1.6;
         }
-
-        .category {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .category h2 {
-            color: #667eea;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-        }
-
-        .tool-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 25px;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            border-color: #667eea;
-        }
-
-        .tool-card h3 {
+        h1 {
+            text-align: center;
             color: #333;
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
         }
-
-        .tool-card h3::before {
-            content: "🎯";
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-
-        .tool-description {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-
-        .tool-features {
-            list-style: none;
-            margin-bottom: 20px;
-        }
-
-        .tool-features li {
-            color: #555;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .tool-features li::before {
-            content: "✓";
-            color: #28a745;
-            font-weight: bold;
-            position: absolute;
-            left: 0;
-        }
-
         .tool-link {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 25px;
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f0f0f0;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            text-align: center;
-            width: 100%;
+            color: #333;
+            border-radius: 5px;
         }
-
         .tool-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        .difficulty {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .difficulty.beginner {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .difficulty.intermediate {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .difficulty.advanced {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            color: white;
-            opacity: 0.8;
-        }
-
-        .footer a {
-            color: white;
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .tools-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .container {
-                padding: 15px;
-            }
+            background: #e0e0e0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎓 HTML Mathematical Interactives</h1>
-            <p>Interactive learning tools for calculus, complex analysis, and mathematical visualization. Explore concepts through hands-on experimentation and visual learning.</p>
-        </div>
-
-        <!-- Calculus Tools -->
-        <div class="category">
-            <h2>📊 Calculus & Analysis</h2>
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <span class="difficulty intermediate">Intermediate</span>
-                    <h3>Epsilon-Delta Continuity</h3>
-                    <p class="tool-description">Interactive exploration of the formal definition of continuity using ε-δ notation. Visualize how epsilon and delta relate to function behavior.</p>
-                    <ul class="tool-features">
-                        <li>Multiple function types (polynomial, trigonometric, exponential)</li>
-                        <li>Real-time feedback on continuity conditions</li>
-                        <li>Educational explanations of ε-δ relationship</li>
-                        <li>Visual representation with adjustable parameters</li>
-                    </ul>
-                    <a href="epsilon_delta_continuity.html" class="tool-link">Launch Tool</a>
-                </div>
-
-                <div class="tool-card">
-                    <span class="difficulty intermediate">Intermediate</span>
-                    <h3>Riemann Sum Explorer</h3>
-                    <p class="tool-description">Visualize Riemann sums and numerical integration. Explore how the number of rectangles affects approximation accuracy.</p>
-                    <ul class="tool-features">
-                        <li>Multiple function types (polynomial, trigonometric, exponential)</li>
-                        <li>Adjustable number of rectangles (1-100)</li>
-                        <li>Different sum types (left, right, midpoint)</li>
-                        <li>Real-time area calculation and error analysis</li>
-                    </ul>
-                    <a href="riemann.html" class="tool-link">Launch Tool</a>
-                </div>
-
-                <div class="tool-card">
-                    <span class="difficulty advanced">Advanced</span>
-                    <h3>Taylor Series Visualizer</h3>
-                    <p class="tool-description">Explore Taylor and Fourier series approximations. See how adding more terms improves the approximation.</p>
-                    <ul class="tool-features">
-                        <li>Multiple function types (sin, cos, exp, ln, arctan)</li>
-                        <li>Adjustable number of terms</li>
-                        <li>Real-time visualization of convergence</li>
-                        <li>Comparison between Taylor and Fourier series</li>
-                    </ul>
-                    <a href="taylor2.html" class="tool-link">Launch Tool</a>
-                </div>
-
-                <div class="tool-card">
-                    <span class="difficulty intermediate">Intermediate</span>
-                    <h3>Mean Value Theorem Games</h3>
-                    <p class="tool-description">Interactive exploration of the Mean Value Theorem through drag-and-drop point selection and slope analysis.</p>
-                    <ul class="tool-features">
-                        <li>Multiple function options with different characteristics</li>
-                        <li>Drag-and-drop interface for selecting points</li>
-                        <li>Real-time slope calculations and comparisons</li>
-                        <li>Educational feedback and hints</li>
-                    </ul>
-                    <a href="mvt_game.html" class="tool-link">Launch Tool</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Differential Equations -->
-        <div class="category">
-            <h2>🔬 Differential Equations</h2>
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <span class="difficulty advanced">Advanced</span>
-                    <h3>Euler's Method Visualizer</h3>
-                    <p class="tool-description">Interactive exploration of Euler's method for solving the Bernoulli ODE: y' = y² - y. Compare numerical and analytical solutions.</p>
-                    <ul class="tool-features">
-                        <li>Visual representation of the Bernoulli ODE</li>
-                        <li>Adjustable step size and initial conditions</li>
-                        <li>Comparison with exact solution</li>
-                        <li>Slope field visualization</li>
-                    </ul>
-                    <a href="euler.html" class="tool-link">Launch Tool</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Complex Analysis -->
-        <div class="category">
-            <h2>🔢 Complex Analysis</h2>
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <span class="difficulty intermediate">Intermediate</span>
-                    <h3>Complex Number Puzzle Game</h3>
-                    <p class="tool-description">Game-based learning of complex number transformations. Solve puzzles by applying various transformations in the complex plane.</p>
-                    <ul class="tool-features">
-                        <li>Interactive complex plane visualization</li>
-                        <li>Multiple transformation types (translation, rotation, scaling)</li>
-                        <li>Progressive difficulty levels</li>
-                        <li>Score tracking and feedback system</li>
-                    </ul>
-                    <a href="complex_puzzle_game.html" class="tool-link">Launch Tool</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Set Theory & Foundations -->
-        <div class="category">
-            <h2>📐 Set Theory & Foundations</h2>
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <span class="difficulty beginner">Beginner</span>
-                    <h3>Interval Notation Visualizer</h3>
-                    <p class="tool-description">Visual representation of interval notation on the number line. See how different interval types are displayed.</p>
-                    <ul class="tool-features">
-                        <li>Interactive input for interval notation</li>
-                        <li>Visual representation of open/closed intervals</li>
-                        <li>Support for various interval formats</li>
-                        <li>Real-time updates</li>
-                    </ul>
-                    <a href="interval.html" class="tool-link">Launch Tool</a>
-                </div>
-
-                <div class="tool-card">
-                    <span class="difficulty intermediate">Intermediate</span>
-                    <h3>Continuity Puzzle Game</h3>
-                    <p class="tool-description">Game-based learning of function continuity concepts. Solve puzzles by understanding continuity properties.</p>
-                    <ul class="tool-features">
-                        <li>Interactive puzzle-solving interface</li>
-                        <li>Multiple continuity scenarios</li>
-                        <li>Progressive difficulty levels</li>
-                        <li>Educational feedback system</li>
-                    </ul>
-                    <a href="continuity_puzzle_game.html" class="tool-link">Launch Tool</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Tools -->
-        <div class="category">
-            <h2>🎮 Additional Learning Tools</h2>
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <span class="difficulty beginner">Beginner</span>
-                    <h3>Easy MVT Game</h3>
-                    <p class="tool-description">Simplified version of the Mean Value Theorem game for beginners. Perfect for first-time learners.</p>
-                    <ul class="tool-features">
-                        <li>Simplified interface for beginners</li>
-                        <li>Clear visual feedback</li>
-                        <li>Step-by-step guidance</li>
-                        <li>Basic MVT concepts</li>
-                    </ul>
-                    <a href="mvt_game_easy.html" class="tool-link">Launch Tool</a>
-                </div>
-
-                <div class="tool-card">
-                    <span class="difficulty intermediate">Intermediate</span>
-                    <h3>Alternative MVT Game</h3>
-                    <p class="tool-description">Alternative approach to learning the Mean Value Theorem with different functions and scenarios.</p>
-                    <ul class="tool-features">
-                        <li>Different function types</li>
-                        <li>Alternative learning approach</li>
-                        <li>Enhanced visual feedback</li>
-                        <li>Intermediate difficulty level</li>
-                    </ul>
-                    <a href="mvt2.html" class="tool-link">Launch Tool</a>
-                </div>
-
-                <div class="tool-card">
-                    <span class="difficulty intermediate">Intermediate</span>
-                    <h3>Epsilon-Delta Game</h3>
-                    <p class="tool-description">Alternative epsilon-delta learning tool with different interface and additional features.</p>
-                    <ul class="tool-features">
-                        <li>Alternative epsilon-delta interface</li>
-                        <li>Enhanced visualizations</li>
-                        <li>Additional learning features</li>
-                        <li>Different approach to continuity</li>
-                    </ul>
-                    <a href="epsilon-delta-game.html" class="tool-link">Launch Tool</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>Created by <a href="https://github.com/tlibman" target="_blank">Tanny Libman</a> for educational purposes</p>
-            <p>View the <a href="https://github.com/tlibman/html-interactives" target="_blank">GitHub repository</a> for more information</p>
-        </div>
-    </div>
+    <h1>HTML Mathematical Interactives</h1>
+    
+    <a href="epsilon_delta_continuity.html" class="tool-link">Epsilon-Delta Continuity</a>
+    <a href="complex_puzzle_game.html" class="tool-link">Complex Number Puzzle Game</a>
+    <a href="continuity_puzzle_game.html" class="tool-link">Continuity Puzzle Game</a>
+    <a href="epsilon-delta-game.html" class="tool-link">Epsilon-Delta Game</a>
+    <a href="riemann.html" class="tool-link">Riemann Sum Explorer</a>
+    <a href="euler.html" class="tool-link">Euler's Method Visualizer</a>
+    <a href="taylor2.html" class="tool-link">Taylor Series Visualizer</a>
+    <a href="mvt_game.html" class="tool-link">Mean Value Theorem Game</a>
+    <a href="mvt_game_easy.html" class="tool-link">Easy MVT Game</a>
+    <a href="mvt2.html" class="tool-link">Alternative MVT Game</a>
+    <a href="interval.html" class="tool-link">Interval Notation Visualizer</a>
 </body>
 </html> 
