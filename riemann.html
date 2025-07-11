@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Riemann Sum Explorer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    p { margin: 0; font-size: 14px; }
+    select, input[type=range] { margin-top: 5px; }
+  </style>
+</head>
+<body>
+<script>
+let slider, aSlider, bSlider, areaP;
+let funcSelect, sumSelect;
+let selectedFunction, selectedFuncName, sumType;
+let showTrueArea; // Add variable for true area toggle
+let trueAreaP; // Add variable for true area display
+let aValueSpan, bValueSpan;
+
+let functions = {
+  "x²": {
+    f: x => x * x,
+    F: x => x * x * x / 3 // antiderivative
+  },
+  "15sin(x)": {
+    f: x => 15 * Math.sin(x),
+    F: x => -15 * Math.cos(x) // antiderivative
+  },
+  "e^x": {
+    f: x => Math.exp(x),
+    F: x => Math.exp(x) // antiderivative
+  },
+  "10ln(x + 1)": {
+    f: x => 10 * Math.log(x + 1),
+    F: x => 10 * ((x + 1) * Math.log(x + 1) - (x + 1)) // antiderivative
+  },
+  "tan(x)": {
+    f: x => Math.tan(x),
+    F: x => -Math.log(Math.abs(Math.cos(x))) // antiderivative
+  },
+  "1/√|x-2|": {
+    f: x => 1 / Math.sqrt(Math.abs(x-2)),
+    F: x => 2 * Math.sqrt(Math.abs(x-2)) * Math.sign(x-2) // antiderivative
+  }
+};
+
+function setup() {
+  createCanvas(600, 400);
+
+  let uiY = height + 10;
+
+  // Number of rectangles
+  let rectDiv = createDiv();
+  rectDiv.position(20, uiY);
+  rectDiv.child(createP("Number of rectangles:"));
+  slider = createSlider(1, 100, 1, 1);
+  slider.parent(rectDiv);
+  slider.input(() => {}); // Add event listener
+
+  // Left bound (a) — now from 0 to 4
+  let aDiv = createDiv();
+  aDiv.position(20, uiY + 50);
+  let aLabel = createP("Left bound (a): ");
+  aValueSpan = createSpan("1.00");
+  aLabel.child(aValueSpan);
+  aDiv.child(aLabel);
+  aSlider = createSlider(0, 4, 1, 0.1);
+  aSlider.parent(aDiv);
+  aSlider.input(() => {}); // Add event listener
+
+  // Right bound (b)
+  let bDiv = createDiv();
+  bDiv.position(20, uiY + 100);
+  let bLabel = createP("Right bound (b): ");
+  bValueSpan = createSpan("3.00");
+  bLabel.child(bValueSpan);
+  bDiv.child(bLabel);
+  bSlider = createSlider(1, 4, 3, 0.1);
+  bSlider.parent(bDiv);
+  bSlider.input(() => {}); // Add event listener
+
+  // Function selector
+  funcSelect = createSelect();
+  funcSelect.position(300, uiY);
+  for (let key in functions) funcSelect.option(key);
+  funcSelect.selected("x²");
+  funcSelect.changed(() => {
+    selectedFuncName = funcSelect.value();
+    selectedFunction = functions[selectedFuncName];
+  });
+
+  // Sum type selector
+  sumSelect = createSelect();
+  sumSelect.position(300, uiY + 40);
+  sumSelect.option("Left");
+  sumSelect.option("Right");
+  sumSelect.option("Midpoint");
+  sumSelect.selected("Left");
+  sumSelect.changed(() => sumType = sumSelect.value());
+
+  // True area toggle
+  let trueAreaDiv = createDiv();
+  trueAreaDiv.position(300, uiY + 80);
+  let trueAreaLabel = createP("Show true area under curve:");
+  trueAreaLabel.style('display', 'inline');
+  trueAreaDiv.child(trueAreaLabel);
+  showTrueArea = createCheckbox('', false);
+  showTrueArea.position(475, uiY + 80);
+  showTrueArea.changed(() => {}); // No action needed, just track state
+
+  // True area and error display
+  trueAreaP = createP('');
+  trueAreaP.position(300, uiY + 110);
+
+  areaP = createP('');
+  areaP.position(20, uiY + 160);
+
+  selectedFuncName = "x²";
+  selectedFunction = functions[selectedFuncName];
+  sumType = "Left";
+}
+
+function draw() {
+  background(255);
+
+  const numRects = slider.value();
+  let a = aSlider.value();
+  let b = bSlider.value();
+  if (a >= b) a = b - 0.01;
+  a = constrain(a, 0, 4);
+  b = constrain(b, 0.01, 4); // b must be at least > 0 for rendering
+
+  drawAxes(); // Fixed axes
+
+  // Calculate true area
+  const trueArea = calculateTrueArea(a, b);
+
+  // Draw true area under curve first (if enabled)
+  if (showTrueArea.checked()) {
+    drawTrueArea(a, b);
+  }
+
+  const dx = (b - a) / numRects;
+  let totalArea = 0;
+  stroke(0);
+  fill(173, 216, 230, 180);
+
+  for (let i = 0; i < numRects; i++) {
+    let x;
+    if (sumType === "Left") x = a + i * dx;
+    else if (sumType === "Right") x = a + (i + 1) * dx;
+    else if (sumType === "Midpoint") x = a + (i + 0.5) * dx;
+
+    let y = selectedFunction.f(x);
+    if (!isFinite(y)) continue;
+
+    let px = map(x - (sumType === "Right" ? dx : (sumType === "Midpoint" ? dx / 2 : 0)), 0, 4, 50, width - 50);
+    let y0 = map(0, -10, 16, height - 50, 50);
+    let yTop = map(y, -10, 16, height - 50, 50);
+    let rectW = map(dx, 0, 4, 0, width - 100);
+    let rectH = y0 - yTop;
+
+    rect(px, min(y0, yTop), rectW, abs(rectH));
+    totalArea += y * dx;
+  }
+
+  drawFunction(a, b);
+  drawABMarkers(a, b);
+
+  // Update displays
+  areaP.html(
+    `Function: ${selectedFuncName}<br>` +
+    `Sum type: ${sumType}<br>` +
+    `Number of rectangles: ${numRects}<br>` +
+    `Approximate area: ${isFinite(totalArea) ? totalArea.toFixed(4) : "undefined"}`
+  );
+
+  // Update a and b values in their labels
+  aValueSpan.html(a.toFixed(2));
+  bValueSpan.html(b.toFixed(2));
+
+  // Only show true area and error when checkbox is checked
+  if (showTrueArea.checked()) {
+    trueAreaP.html(
+      `True area: ${isFinite(trueArea) ? trueArea.toFixed(4) : "undefined"}<br>` +
+      `Error: ${isFinite(trueArea) && isFinite(totalArea) ? Math.abs(totalArea - trueArea).toFixed(4) : "undefined"}`
+    );
+    trueAreaP.show();
+  } else {
+    trueAreaP.hide();
+  }
+}
+
+function drawFunction(a = 0, b = 4) {
+  stroke(255, 0, 0);
+  noFill();
+  beginShape();
+  let prevY = null;
+
+  for (let x = 0; x <= 4; x += 0.01) {
+    let yVal = selectedFunction.f(x);
+
+    if (!isFinite(yVal) || Math.abs(yVal) > 100) {
+      endShape();
+      beginShape();
+      prevY = null;
+      continue;
+    }
+
+    if (prevY !== null && Math.abs(yVal - prevY) > 20) {
+      endShape();
+      beginShape();
+    }
+
+    let px = map(x, 0, 4, 50, width - 50);
+    let py = map(yVal, -10, 16, height - 50, 50);
+    vertex(px, py);
+    prevY = yVal;
+  }
+
+  endShape();
+}
+
+function drawAxes() {
+  stroke(0);
+
+  // Properly place the x-axis at y = 0
+  let yZero = map(0, -10, 16, height - 50, 50);
+  line(50, yZero, width - 50, yZero); // x-axis
+  line(50, height - 50, 50, 50);      // y-axis
+
+  // X-axis ticks
+  for (let i = 0; i <= 4; i++) {
+    let x = map(i, 0, 4, 50, width - 50);
+    line(x, yZero - 5, x, yZero + 5);
+    textAlign(CENTER, TOP);
+    text(i, x, yZero + 8);
+  }
+
+  // Y-axis ticks
+  for (let i = -10; i <= 16; i += 4) {
+    let y = map(i, -10, 16, height - 50, 50);
+    line(45, y, 55, y);
+    textAlign(RIGHT, CENTER);
+    text(i, 45, y);
+  }
+}
+
+function drawABMarkers(a, b) {
+  let ax = map(a, 0, 4, 50, width - 50);
+  let bx = map(b, 0, 4, 50, width - 50);
+  let yZero = map(0, -10, 16, height - 50, 50);
+  let ay = map(selectedFunction.f(a), -10, 16, height - 50, 50);
+  let by = map(selectedFunction.f(b), -10, 16, height - 50, 50);
+
+  stroke('#0074D9');
+  line(ax, yZero, ax, ay);
+  fill('#0074D9');
+  textAlign(CENTER, BOTTOM);
+  text('a', ax, min(yZero, ay) - 5);
+
+  stroke('#FF4136');
+  line(bx, yZero, bx, by);
+  fill('#FF4136');
+  textAlign(CENTER, BOTTOM);
+  text('b', bx, min(yZero, by) - 5);
+}
+
+function drawTrueArea(a, b) {
+  // Draw the filled area under the curve between a and b
+  fill(255, 255, 0, 100); // Semi-transparent yellow
+  stroke(255, 215, 0); // Gold stroke
+  strokeWeight(1);
+  
+  beginShape();
+  
+  // Start at the left bound on the x-axis
+  let ax = map(a, 0, 4, 50, width - 50);
+  let yZero = map(0, -10, 16, height - 50, 50);
+  vertex(ax, yZero);
+  
+  // Draw the curve from a to b
+  for (let x = a; x <= b; x += 0.01) {
+    let yVal = selectedFunction.f(x);
+    
+    if (!isFinite(yVal) || Math.abs(yVal) > 100) {
+      // Skip this point if function is undefined
+      continue;
+    }
+    
+    let px = map(x, 0, 4, 50, width - 50);
+    let py = map(yVal, -10, 16, height - 50, 50);
+    vertex(px, py);
+  }
+  
+  // End at the right bound on the x-axis
+  let bx = map(b, 0, 4, 50, width - 50);
+  vertex(bx, yZero);
+  
+  endShape(CLOSE);
+}
+
+function calculateTrueArea(a, b) {
+  try {
+    // Check for improper integrals
+    if (selectedFuncName === "tan(x)") {
+      // Check if the interval contains π/2 or 3π/2 where tan(x) has vertical asymptotes
+      const pi2 = Math.PI / 2;
+      const pi32 = 3 * Math.PI / 2;
+      
+      if ((a < pi2 && b > pi2) || (a < pi32 && b > pi32)) {
+        return NaN; // Improper integral doesn't converge
+      }
+    }
+    
+    return selectedFunction.F(b) - selectedFunction.F(a);
+  } catch (e) {
+    return NaN;
+  }
+}
+</script>
+</body>
+</html>
