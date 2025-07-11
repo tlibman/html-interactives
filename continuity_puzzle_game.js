@@ -23,12 +23,6 @@ const continuityAnalysis = {};
 
 // Modified functions with discontinuities at different points
 const functions = {
-    identity: {
-        name: "Identity",
-        description: "f(x) = x",
-        evaluate: x => x,
-        latex: "x"
-    },
     reciprocal: {
         name: "Reciprocal", 
         description: "f(x) = 1/x",
@@ -40,12 +34,6 @@ const functions = {
         description: "f(x) = (x+3)/(x-3)",
         evaluate: x => x === 3 ? null : (x+3)/(x-3),
         latex: "(x+3)/(x-3)"
-    },
-    log: {
-        name: "Natural Log",
-        description: "f(x) = ln(x)",
-        evaluate: x => x <= 0 ? null : Math.log(x),
-        latex: "ln(x)"
     },
     floor: {
         name: "Floor",
@@ -128,15 +116,22 @@ const puzzleDatabase = [];
 
 // Hard-coded discontinuity sets for each function
 const functionDiscontinuities = {
-    identity: [],
     reciprocal: [0],
     rational1: [3],
-    log: [0],
     floor: [], // Discontinuous at all integers, handled specially
     piecewise1: [2],
     absolute: [1],
     tangent: [] // Discontinuous at (2k+1)π/2, handled specially
 };
+
+// Function to get discontinuities, handling special cases like floor
+function getFunctionDiscontinuities(funcKey) {
+    if (funcKey === 'floor') {
+        // Floor is discontinuous at all integers - return special marker
+        return 'Z';
+    }
+    return functionDiscontinuities[funcKey] || [];
+}
 
 // Hard-coded discontinuity sets for all combinations
 function generateHardCodedContinuityAnalysis() {
@@ -156,9 +151,47 @@ function generateHardCodedContinuityAnalysis() {
 }
 
 function getHardCodedDiscontinuitySet(f1Key, opKey, f2Key) {
-    const f1Discontinuities = functionDiscontinuities[f1Key];
-    const f2Discontinuities = functionDiscontinuities[f2Key];
+    const f1Discontinuities = getFunctionDiscontinuities(f1Key);
+    const f2Discontinuities = getFunctionDiscontinuities(f2Key);
     
+    // Handle special case where either function is floor (discontinuous at all integers)
+    if (f1Discontinuities === 'Z' || f2Discontinuities === 'Z') {
+        // If either function is floor, the result is discontinuous at all integers
+        // plus any additional discontinuities from the other function
+        let additionalDiscontinuities = [];
+        
+        if (f1Discontinuities === 'Z' && f2Discontinuities === 'Z') {
+            // Both are floor - result is discontinuous at all integers
+            return 'Z';
+        } else if (f1Discontinuities === 'Z') {
+            // f1 is floor, f2 has specific discontinuities
+            additionalDiscontinuities = f2Discontinuities;
+        } else {
+            // f2 is floor, f1 has specific discontinuities
+            additionalDiscontinuities = f1Discontinuities;
+        }
+        
+        // For addition/multiplication: union with integers
+        if (opKey === 'add' || opKey === 'multiply') {
+            return 'Z'; // All integers plus any additional points
+        }
+        
+        // For division: also consider where f2(x) = 0
+        if (opKey === 'divide') {
+            const denominatorZeros = getDenominatorZeros(f2Key);
+            if (denominatorZeros.length > 0) {
+                return 'Z'; // All integers plus denominator zeros
+            }
+            return 'Z';
+        }
+        
+        // For composition: more complex
+        if (opKey === 'compose') {
+            return getCompositionDiscontinuities(f1Key, f2Key);
+        }
+    }
+    
+    // Handle normal case (neither function is floor)
     switch(opKey) {
         case 'add':
         case 'multiply':
@@ -181,14 +214,10 @@ function getHardCodedDiscontinuitySet(f1Key, opKey, f2Key) {
 function getDenominatorZeros(funcKey) {
     // Find where f(x) = 0
     switch(funcKey) {
-        case 'identity':
-            return [0];
         case 'reciprocal':
             return []; // 1/x never equals 0
         case 'rational1':
             return [-3]; // (x+3)/(x-3) = 0 when x+3 = 0, so x = -3
-        case 'log':
-            return [1]; // ln(x) = 0 when x = 1
         case 'floor':
             return [0]; // floor(x) = 0 when 0 ≤ x < 1
         case 'piecewise1':
@@ -203,7 +232,14 @@ function getDenominatorZeros(funcKey) {
 }
 
 function getCompositionDiscontinuities(f1Key, f2Key) {
-    const discontinuities = [...functionDiscontinuities[f2Key]];
+    const f2Discontinuities = getFunctionDiscontinuities(f2Key);
+    
+    // If f2 is floor, the composition is discontinuous at all integers
+    if (f2Discontinuities === 'Z') {
+        return 'Z';
+    }
+    
+    const discontinuities = [...(f2Discontinuities === 'Z' ? [] : f2Discontinuities)];
     
     // Special cases for composition
     if (f1Key === 'floor') {
@@ -214,10 +250,6 @@ function getCompositionDiscontinuities(f1Key, f2Key) {
         // 1/f2 is discontinuous where f2(x) = 0
         const zeros = getDenominatorZeros(f2Key);
         discontinuities.push(...zeros);
-    } else if (f1Key === 'log') {
-        // ln(f2) is discontinuous where f2(x) ≤ 0
-        const nonPositivePoints = getNonPositiveOutputs(f2Key);
-        discontinuities.push(...nonPositivePoints);
     } else if (f1Key === 'rational1') {
         // (f2+3)/(f2-3) is discontinuous where f2(x) = 3
         const threePoints = getOutputEqualsThree(f2Key);
@@ -242,14 +274,10 @@ function getCompositionDiscontinuities(f1Key, f2Key) {
 function getIntegerOutputs(funcKey) {
     // Find x where f(x) is an integer
     switch(funcKey) {
-        case 'identity':
-            return [0, 1, 2, 3, -1, -2, -3];
         case 'reciprocal':
             return [1, -1, 0.5, -0.5, 0.25, -0.25];
         case 'rational1':
             return [0, 6, -1.5, 4.5]; // Some integer outputs
-        case 'log':
-            return [1, Math.E, Math.E*Math.E]; // ln(1)=0, ln(e)=1, ln(e²)=2
         case 'floor':
             return [0, 1, 2, 3, -1, -2, -3]; // All integers
         case 'piecewise1':
@@ -266,14 +294,10 @@ function getIntegerOutputs(funcKey) {
 function getNonPositiveOutputs(funcKey) {
     // Find x where f(x) ≤ 0
     switch(funcKey) {
-        case 'identity':
-            return [0, -1, -2, -3];
         case 'reciprocal':
             return [-1, -2, -3]; // 1/x ≤ 0 when x < 0
         case 'rational1':
             return [-3, -1, -2]; // (x+3)/(x-3) ≤ 0 in certain intervals
-        case 'log':
-            return [0, -1, -2]; // ln(x) ≤ 0 when 0 < x ≤ 1
         case 'floor':
             return [0, -1, -2, -3]; // floor(x) ≤ 0 when x < 1
         case 'piecewise1':
@@ -290,14 +314,10 @@ function getNonPositiveOutputs(funcKey) {
 function getOutputEqualsThree(funcKey) {
     // Find x where f(x) = 3
     switch(funcKey) {
-        case 'identity':
-            return [3];
         case 'reciprocal':
             return [1/3];
         case 'rational1':
             return []; // (x+3)/(x-3) = 3 has no solution
-        case 'log':
-            return [Math.exp(3)];
         case 'floor':
             return [3.5]; // floor(3.5) = 3
         case 'piecewise1':
@@ -314,14 +334,10 @@ function getOutputEqualsThree(funcKey) {
 function getOutputEqualsTwo(funcKey) {
     // Find x where f(x) = 2
     switch(funcKey) {
-        case 'identity':
-            return [2];
         case 'reciprocal':
             return [0.5];
         case 'rational1':
             return [9]; // (x+3)/(x-3) = 2 when x = 9
-        case 'log':
-            return [Math.exp(2)];
         case 'floor':
             return [2.5]; // floor(2.5) = 2
         case 'piecewise1':
@@ -338,14 +354,10 @@ function getOutputEqualsTwo(funcKey) {
 function getOutputEqualsOne(funcKey) {
     // Find x where f(x) = 1
     switch(funcKey) {
-        case 'identity':
-            return [1];
         case 'reciprocal':
             return [1];
         case 'rational1':
             return []; // (x+3)/(x-3) = 1 has no solution
-        case 'log':
-            return [Math.E];
         case 'floor':
             return [1.5]; // floor(1.5) = 1
         case 'piecewise1':
@@ -373,8 +385,6 @@ function getTangentDiscontinuities(funcKey) {
 function getOutputEqualsValue(funcKey, value) {
     // Find x where f(x) = value
     switch(funcKey) {
-        case 'identity':
-            return [value];
         case 'reciprocal':
             return value !== 0 ? [1/value] : [];
         case 'rational1':
@@ -385,8 +395,6 @@ function getOutputEqualsValue(funcKey, value) {
             // x(1-value) = -3(value+1)
             // x = -3(value+1)/(1-value)
             return value !== 1 ? [-3*(value+1)/(1-value)] : [];
-        case 'log':
-            return value > 0 ? [Math.exp(value)] : [];
         case 'floor':
             return Number.isInteger(value) ? [value + 0.5] : [];
         case 'piecewise1':
@@ -449,6 +457,11 @@ function generatePuzzleDatabase() {
 }
 
 function formatContinuitySet(discontinuitySet) {
+    // Handle special case for floor function (discontinuous at all integers)
+    if (discontinuitySet === 'Z') {
+        return "ℝ \\ ℤ";
+    }
+    
     if (discontinuitySet.length === 0) {
         return "ℝ";
     } else {
@@ -557,7 +570,6 @@ function setupUI() {
     // Setup control buttons
     document.getElementById('checkBtn').onclick = checkAnswer;
     document.getElementById('clearBtn').onclick = clearSelection;
-    document.getElementById('hintBtn').onclick = showHint;
     document.getElementById('newGameBtn').onclick = generateNewPuzzle;
 }
 
@@ -681,7 +693,6 @@ function checkAnswer() {
         const op = operators[opKey];
         setMessage(`🎉 Correct! Your combination ${f1.name} ${op.symbol} ${f2.name} is continuous exactly on ${currentPuzzle.targetSet}.`, "success");
         messageTimer = 300; // 5 seconds
-        setTimeout(generateNewPuzzle, 3000);
     } else {
         currentStreak = 0;
         const f1 = functions[f1Key];
@@ -694,20 +705,7 @@ function checkAnswer() {
     updateStats();
 }
 
-function showHint() {
-    const hints = [
-        "Think about where each function is discontinuous.",
-        "Consider how the operator affects the domain of the combined function.",
-        "Remember: division by zero creates discontinuities.",
-        "Composition can change the domain significantly.",
-        "Addition and multiplication preserve most discontinuities.",
-        "The target set shows exactly where the function should be continuous."
-    ];
-    
-    const randomHint = hints[Math.floor(Math.random() * hints.length)];
-    setMessage(`💡 Hint: ${randomHint}`, "hint");
-    messageTimer = 240; // 4 seconds
-}
+
 
 function generateNewPuzzle() {
     if (puzzleDatabase.length === 0) {
