@@ -465,7 +465,7 @@ function renderStepList(a, b, c, d) {
         listDiv.innerHTML += '<b>Transformations:</b><br><i>None</i>';
         return;
     }
-    let html = '<b>Transformations:</b><ol style="padding-left: 20px">';
+    let html = '<b>Transformations:</b><div style="padding-left: 20px">';
     for (let i = 0; i < steps.length; ++i) {
         let desc = '';
         if (i === 0) {
@@ -488,9 +488,9 @@ function renderStepList(a, b, c, d) {
                 desc = step.type;
             }
         }
-        html += `<li>${i}. ${desc}</li>`;
+        html += `<div style="margin-bottom: 6px;">${i}. ${desc}</div>`;
     }
-    html += '</ol>';
+    html += '</div>';
     // Only update the transformation list, not the formula
     const mobiusFormula = document.getElementById('mobius-formula');
     listDiv.innerHTML = mobiusFormula.outerHTML + html;
