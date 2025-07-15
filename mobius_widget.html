@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mobius Transformation Widget</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        .inputs, .controls { margin-bottom: 20px; }
+        .inputs label { margin-right: 10px; }
+        .inputs input { width: 80px; margin-right: 20px; }
+        #mobius-canvas { border: 1px solid #888; background: #f9f9f9; }
+        .step-info { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Mobius Transformation Visualizer</h2>
+    <div class="inputs">
+        <label>a: <input type="text" id="input-a" value="1+0i"></label>
+        <label>b: <input type="text" id="input-b" value="0+0i"></label>
+        <label>c: <input type="text" id="input-c" value="0+0i"></label>
+        <label>d: <input type="text" id="input-d" value="1+0i"></label>
+        <label>Shape:
+            <select id="shape-select">
+                <option value="circle">Circle</option>
+                <option value="square">Square</option>
+            </select>
+        </label>
+        <button id="decompose-btn">Decompose</button>
+        <button id="randomize-btn">Randomize</button>
+    </div>
+    <div style="display: flex; flex-direction: row; align-items: flex-start;">
+        <div>
+            <canvas id="mobius-canvas" width="500" height="500"></canvas>
+            <div class="controls">
+                <button id="prev-step">Previous Step</button>
+                <button id="next-step">Next Step</button>
+                <button id="reset-step">Reset</button>
+            </div>
+            <div class="step-info" id="step-info">Step: -</div>
+        </div>
+        <div id="step-list" style="margin-left: 30px; min-width: 250px;">
+            <div id="mobius-formula" style="margin-bottom: 18px; font-weight: bold;"></div>
+        </div>
+    </div>
+    <script src="mobius_widget.js"></script>
+</body>
+</html> 
