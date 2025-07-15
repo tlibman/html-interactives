@@ -299,20 +299,30 @@ function drawShape(ctx, points, opts = {}) {
     ctx.translate(-centerRe, -centerIm);
     ctx.beginPath();
     let prevFinite = false;
+    let prevP = null;
+    const DIST_THRESHOLD = 100; // break if distance > 100 units
     for (let i = 0; i < points.length; ++i) {
         let p = points[i];
         if (!isFinite(p.re) || !isFinite(p.im)) {
             prevFinite = false;
-            // Optionally, mark infinite points for debugging:
-            // ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = 'red'; ctx.arc(...); ctx.restore();
+            prevP = null;
             continue;
         }
         if (!prevFinite) {
             ctx.moveTo(p.re, p.im);
         } else {
-            ctx.lineTo(p.re, p.im);
+            // Only connect if distance is not too large
+            const dx = p.re - prevP.re;
+            const dy = p.im - prevP.im;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > DIST_THRESHOLD) {
+                ctx.moveTo(p.re, p.im);
+            } else {
+                ctx.lineTo(p.re, p.im);
+            }
         }
         prevFinite = true;
+        prevP = p;
     }
     // Never close the path
     ctx.strokeStyle = '#0074D9';
