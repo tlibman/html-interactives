@@ -118,18 +118,18 @@ function generateShape(type) {
                 });
             }
         }
-    } else if (type === 'triangle') {
+    } else if (type === 'hexagon') {
         let N = 400;
-        let verts = [
-            { re: Math.cos(0), im: Math.sin(0) },
-            { re: Math.cos(2*Math.PI/3), im: Math.sin(2*Math.PI/3) },
-            { re: Math.cos(4*Math.PI/3), im: Math.sin(4*Math.PI/3) }
-        ];
-        for (let i = 0; i < 3; ++i) {
+        let verts = [];
+        for (let i = 0; i < 6; ++i) {
+            let angle = 2 * Math.PI * i / 6;
+            verts.push({ re: Math.cos(angle), im: Math.sin(angle) });
+        }
+        for (let i = 0; i < 6; ++i) {
             let a = verts[i];
-            let b = verts[(i+1)%3];
-            for (let j = 0; j < N/3; ++j) {
-                let t = j / (N/3);
+            let b = verts[(i+1)%6];
+            for (let j = 0; j < N/6; ++j) {
+                let t = j / (N/6);
                 points.push({
                     re: (1-t)*a.re + t*b.re,
                     im: (1-t)*a.im + t*b.im
