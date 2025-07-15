@@ -298,21 +298,23 @@ function drawShape(ctx, points, opts = {}) {
     ctx.scale(100 * scale, -100 * scale);
     ctx.translate(-centerRe, -centerIm);
     ctx.beginPath();
-    let started = false;
+    let prevFinite = false;
     for (let i = 0; i < points.length; ++i) {
         let p = points[i];
         if (!isFinite(p.re) || !isFinite(p.im)) {
-            started = false;
+            prevFinite = false;
+            // Optionally, mark infinite points for debugging:
+            // ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = 'red'; ctx.arc(...); ctx.restore();
             continue;
         }
-        if (!started) {
+        if (!prevFinite) {
             ctx.moveTo(p.re, p.im);
-            started = true;
         } else {
             ctx.lineTo(p.re, p.im);
         }
+        prevFinite = true;
     }
-    // Do not close the path, as this can create unwanted lines if the shape is not fully connected
+    // Never close the path
     ctx.strokeStyle = '#0074D9';
     ctx.lineWidth = 0.02 / scale;
     ctx.stroke();
