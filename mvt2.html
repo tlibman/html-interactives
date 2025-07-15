@@ -5,19 +5,84 @@
   <title>Mean Value Theorem Visualizer</title>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 1em; }
-    canvas { display: block; margin-top: 1em; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+    }
+    
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+    
+    select {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 14px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    label {
+      font-weight: 500;
+      color: #333;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
   </style>
 </head>
 <body>
-  <h2>Mean Value Theorem Visualizer</h2>
-  <label for="funcSelect">Choose a function: </label>
-  <select id="funcSelect">
-    <option value="cubic">f(x) = x³ - x</option>
-    <option value="sine">f(x) = 10sin(x)</option>
-    <option value="cosx2">f(x) = 10cos(x²)</option>
-    <option value="gaussianSine">f(x) = 10e^(-x²)·sin(2x)</option>
-  </select>
+  <div class="container">
+    <h2>Mean Value Theorem Visualizer</h2>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label for="funcSelect">Choose a function:</label>
+        <select id="funcSelect">
+          <option value="cubic">f(x) = x³ - x</option>
+          <option value="sine">f(x) = 10sin(x)</option>
+          <option value="cosx2">f(x) = 10cos(x²)</option>
+          <option value="gaussianSine">f(x) = 10e^(-x²)·sin(2x)</option>
+        </select>
+      </div>
+    </div>
+  </div>
 
 <script>
 let f = x => x ** 3 - x;

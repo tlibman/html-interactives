@@ -4,17 +4,97 @@
   <meta charset="UTF-8">
   <title>Interval Notation Visualizer</title>
   <style>
-    body { margin: 0; padding: 0; font-family: sans-serif; }
-    #controls { padding: 10px; font-size: 18px; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    #controls {
+      padding: 10px 0;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    input[type="text"] {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 16px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-width: 150px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    #canvas-container {
+      text-align: center;
+    }
+    
+    canvas {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-  <div id="controls">
-    Enter interval (e.g., (-3, 5]): 
-    <input id="intervalInput" type="text" value="(-3, 5)">
-    <button id="drawButton">Draw</button>
+  <div class="container">
+    <h1>Interval Notation Visualizer</h1>
+    
+    <div id="controls">
+      Enter interval (e.g., (-3, 5]): 
+      <input id="intervalInput" type="text" value="(-3, 5)">
+      <button id="drawButton">Draw</button>
+    </div>
+    
+    <div id="canvas-container"></div>
   </div>
-  <div id="canvas-container"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
   <script>

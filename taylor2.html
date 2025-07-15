@@ -4,16 +4,143 @@
   <meta charset="UTF-8" />
   <title>Taylor Series Visualizer</title>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    select {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-size: 14px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    label {
+      font-weight: 500;
+      color: #333;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    #poly-display {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #333;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
 </head>
 <body>
+  <div class="container">
+    <h1>Taylor Series Visualizer</h1>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label for="funcSelect">Function:</label>
+        <select id="funcSelect">
+          <option value="sin">sin(x)</option>
+          <option value="cos">cos(x)</option>
+          <option value="exp">e^x</option>
+          <option value="ln">ln(1+x)</option>
+          <option value="arctan">arctan(x)</option>
+          <option value="geom">1/(1-x)</option>
+          <option value="flat">e^(-1/x²)</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label for="seriesType">Series Type:</label>
+        <select id="seriesType">
+          <option value="taylor">Taylor</option>
+          <option value="fourier">Fourier</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <button id="upBtn">↑ Terms</button>
+        <button id="downBtn">↓ Terms</button>
+        <button id="addTerm">Add Term</button>
+        <button id="reset">Reset</button>
+      </div>
+      
+      <div class="control-group">
+        <input type="checkbox" id="overlayCheckbox">
+        <label for="overlayCheckbox">Overlay Approximations</label>
+      </div>
+    </div>
+    
+    <div id="poly-display"></div>
+  </div>
   <script>
     let termCount = 1;
     let previousCurves = [];
     let currentFunc = 'sin';
     let seriesType = 'taylor'; // 'taylor' or 'fourier'
+    let polyDisplay; // Global variable for the polynomial display
 
     const minX = -10;
     const maxX = 10;
@@ -340,66 +467,61 @@
       createCanvas(800, 600);
       textSize(16);
       
-      // Create controls
-      createDiv('Function:').position(10, 10);
-      let funcSelect = createSelect();
-      funcSelect.option('sin(x)', 'sin');
-      funcSelect.option('cos(x)', 'cos');
-      funcSelect.option('e^x', 'exp');
-      funcSelect.option('arctan(x)', 'arctan');
-      funcSelect.option('1 / (1 - x)', 'geom');
-      funcSelect.option('e^{-1/x²}', 'flat');
-      funcSelect.selected('sin');
-      funcSelect.position(80, 10);
-      funcSelect.changed(() => {
-        currentFunc = funcSelect.value();
+      // Get HTML elements
+      const funcSelect = document.getElementById('funcSelect');
+      const seriesTypeSelect = document.getElementById('seriesType');
+      const upBtn = document.getElementById('upBtn');
+      const downBtn = document.getElementById('downBtn');
+      const addTermBtn = document.getElementById('addTerm');
+      const resetBtn = document.getElementById('reset');
+      const overlayCheckbox = document.getElementById('overlayCheckbox');
+      polyDisplay = document.getElementById('poly-display'); // Assign to global variable
+      
+      // Add event listeners
+      funcSelect.addEventListener('change', () => {
+        currentFunc = funcSelect.value;
         termCount = 1;
         previousCurves = [];
       });
       
-      createDiv('Series:').position(10, 40);
-      let seriesSelect = createSelect();
-      seriesSelect.option('Taylor', 'taylor');
-      seriesSelect.option('Fourier', 'fourier');
-      seriesSelect.selected('taylor');
-      seriesSelect.position(80, 40);
-      seriesSelect.changed(() => {
-        seriesType = seriesSelect.value();
+      seriesTypeSelect.addEventListener('change', () => {
+        seriesType = seriesTypeSelect.value;
         termCount = 1;
         previousCurves = [];
       });
       
-      let upBtn = createButton('↑ Terms');
-      upBtn.position(10, 70);
-      upBtn.mousePressed(() => {
-        if (overlayCheckbox.checked()) {
+      upBtn.addEventListener('click', () => {
+        if (overlayCheckbox.checked) {
           previousCurves.push({ termCount, func: currentFunc });
         }
         termCount++;
       });
       
-      let downBtn = createButton('↓ Terms');
-      downBtn.position(80, 70);
-      downBtn.mousePressed(() => {
+      downBtn.addEventListener('click', () => {
         if (termCount > 1) termCount--;
       });
       
-      let overlayCheckbox = createCheckbox('Overlay Approximations', false);
-      overlayCheckbox.position(10, 100);
-      overlayCheckbox.changed(() => {
-        if (!overlayCheckbox.checked()) {
+      addTermBtn.addEventListener('click', () => {
+        if (overlayCheckbox.checked) {
+          previousCurves.push({ termCount, func: currentFunc });
+        }
+        termCount++;
+      });
+      
+      resetBtn.addEventListener('click', () => {
+        termCount = 1;
+        previousCurves = [];
+      });
+
+      overlayCheckbox.addEventListener('change', () => {
+        if (!overlayCheckbox.checked) {
           previousCurves = [];
         }
       });
       
-      polyDisplay = createDiv('');
-      polyDisplay.position(width - 300, height - 100);
-      polyDisplay.style('font-family', 'monospace');
-      polyDisplay.style('font-size', '14px');
-      polyDisplay.style('max-width', '500px');
-      polyDisplay.style('background', 'rgba(255, 255, 255, 0.9)');
-      polyDisplay.style('padding', '5px');
-      polyDisplay.style('border-radius', '5px');
+      // Initialize
+      currentFunc = funcSelect.value;
+      seriesType = seriesTypeSelect.value;
     }
 
     function toCanvasX(x) {
@@ -489,7 +611,7 @@
       let formula = seriesType === 'fourier' ? 
         getFourierFormula(currentFunc, termCount) : 
         getTaylorFormula(currentFunc, termCount);
-      polyDisplay.html(`P(x) ≈ ${formula}`);
+      polyDisplay.innerHTML = `P(x) ≈ ${formula}`;
     }
 
     function keyPressed() {
