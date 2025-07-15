@@ -466,27 +466,29 @@ function renderStepList(a, b, c, d) {
         return;
     }
     let html = '<b>Transformations:</b><ol style="padding-left: 20px">';
-    html += `<li>Original shape</li>`;
-    let transNum = 0;
-    for (let i = 1; i < steps.length; ++i) {
-        const step = steps[i];
+    for (let i = 0; i < steps.length; ++i) {
         let desc = '';
-        if (step.type === 'invalid') {
-            desc = '<span style="color:red">Invalid Mobius transformation (division by zero or undefined)</span>';
-        } else if (step.type === 'translation') {
-            desc = `#${transNum++}: Translation: z → z + (${formatComplex(step.params.t)})`;
-        } else if (step.type === 'inversion') {
-            desc = `#${transNum++}: Inversion: z → 1/z`;
-        } else if (step.type === 'dilation_rotation') {
-            const lambda = step.params.lambda;
-            const r = complexAbs(lambda).toFixed(2);
-            const theta = complexArg(lambda);
-            const deg = (theta * 180 / Math.PI).toFixed(1);
-            desc = `#${transNum++}: Dilation/Rotation: z → (${formatComplex(lambda)})·z  (|λ|=${r}, arg=${deg}°)`;
+        if (i === 0) {
+            desc = 'Original shape';
         } else {
-            desc = `#${transNum++}: ` + step.type;
+            const step = steps[i];
+            if (step.type === 'invalid') {
+                desc = '<span style="color:red">Invalid Mobius transformation (division by zero or undefined)</span>';
+            } else if (step.type === 'translation') {
+                desc = 'Translation: z → z + (' + formatComplex(step.params.t) + ')';
+            } else if (step.type === 'inversion') {
+                desc = 'Inversion: z → 1/z';
+            } else if (step.type === 'dilation_rotation') {
+                const lambda = step.params.lambda;
+                const r = complexAbs(lambda).toFixed(2);
+                const theta = complexArg(lambda);
+                const deg = (theta * 180 / Math.PI).toFixed(1);
+                desc = 'Dilation/Rotation: z → (' + formatComplex(lambda) + ')·z  (|λ|=' + r + ', arg=' + deg + '°)';
+            } else {
+                desc = step.type;
+            }
         }
-        html += `<li>${desc}</li>`;
+        html += `<li>${i}. ${desc}</li>`;
     }
     html += '</ol>';
     // Only update the transformation list, not the formula
