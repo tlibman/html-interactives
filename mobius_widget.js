@@ -118,6 +118,24 @@ function generateShape(type) {
                 });
             }
         }
+    } else if (type === 'triangle') {
+        let N = 400;
+        let verts = [
+            { re: Math.cos(0), im: Math.sin(0) },
+            { re: Math.cos(2*Math.PI/3), im: Math.sin(2*Math.PI/3) },
+            { re: Math.cos(4*Math.PI/3), im: Math.sin(4*Math.PI/3) }
+        ];
+        for (let i = 0; i < 3; ++i) {
+            let a = verts[i];
+            let b = verts[(i+1)%3];
+            for (let j = 0; j < N/3; ++j) {
+                let t = j / (N/3);
+                points.push({
+                    re: (1-t)*a.re + t*b.re,
+                    im: (1-t)*a.im + t*b.im
+                });
+            }
+        }
     }
     return points;
 }
