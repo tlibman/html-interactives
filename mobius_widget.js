@@ -100,13 +100,13 @@ function generateShape(type) {
     // Returns an array of points {re, im}
     let points = [];
     if (type === 'circle') {
-        let N = 100;
+        let N = 400;
         for (let i = 0; i < N; ++i) {
             let theta = 2 * Math.PI * i / N;
             points.push({ re: Math.cos(theta), im: Math.sin(theta) });
         }
     } else if (type === 'square') {
-        let N = 25;
+        let N = 400;
         for (let i = 0; i < 4; ++i) {
             let angle = Math.PI/2 * i;
             let nextAngle = Math.PI/2 * (i+1);
