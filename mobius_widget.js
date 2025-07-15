@@ -312,7 +312,7 @@ function drawShape(ctx, points, opts = {}) {
             ctx.lineTo(p.re, p.im);
         }
     }
-    ctx.closePath();
+    // Do not close the path, as this can create unwanted lines if the shape is not fully connected
     ctx.strokeStyle = '#0074D9';
     ctx.lineWidth = 0.02 / scale;
     ctx.stroke();
