@@ -123,8 +123,10 @@
         <div class="grid-box" id="cell-DA"></div>
         <div class="grid-box" style="flex-direction: column; align-items: center; min-width: 90px;">
           <div style="display: flex; align-items: center; justify-content: center;">
+            H(
             <input id="input-DB-x" class="input-coord" placeholder="x"> ,
             <input id="input-DB-y" class="input-coord" placeholder="y">
+            )
           </div>
         </div>
       </div>
@@ -175,9 +177,9 @@
                 points.CB[1] + points.DA[1] - points.CA[1]
             ];
             // Fill grid
-            document.getElementById('cell-CA').textContent = coordToString(points.CA);
-            document.getElementById('cell-CB').textContent = coordToString(points.CB);
-            document.getElementById('cell-DA').textContent = coordToString(points.DA);
+            document.getElementById('cell-CA').textContent = 'E' + coordToString(points.CA);
+            document.getElementById('cell-CB').textContent = 'F' + coordToString(points.CB);
+            document.getElementById('cell-DA').textContent = 'G' + coordToString(points.DA);
             document.getElementById('input-DB-x').value = '';
             document.getElementById('input-DB-y').value = '';
             document.getElementById('input-DB-x').disabled = false;
