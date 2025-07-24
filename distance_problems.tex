@@ -1,0 +1,33 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{tikz}
+\usepackage{geometry}
+\geometry{margin=1in}
+\begin{document}
+
+\section*{Distance problems}
+
+\begin{enumerate}
+  \item Find all points which are distance $5$ from both $(1, 1)$ and $(7, 1)$.
+  
+  \item Consider quadrilateral $ABCD$ defined by $A = (3,4), B= (-1, 1), C = (-4, -3), D = (8,2)$. Find the perimeter of $ABCD$.
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[scale=0.4]
+  % Axes
+  \draw[->] (-6, 0) -- (12, 0) node[right]{$x$};
+  \draw[->] (0, -1) -- (0, 6) node[above]{$y$};
+  % Points
+  \filldraw (3,4) circle (2pt) node[above right]{$A$};
+  \filldraw (-1,1) circle (2pt) node[above left]{$B$};
+  \filldraw (-4,-3) circle (2pt) node[below left]{$C$};
+  \filldraw (8,2) circle (2pt) node[below right]{$D$};
+  % Quadrilateral
+  \draw[thick] (3,4) -- (-1,1) -- (-4,-3) -- (8,2) -- (3,4);
+\end{tikzpicture}
+\end{center}
+
+\vspace{2em}
+
+\end{document} 
