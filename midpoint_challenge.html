@@ -93,7 +93,7 @@
       border-radius: 4px;
       padding: 4px 8px;
     }
-    #randomize, #submit {
+    #randomize, #submit, #reveal-answer {
       background: #007bff;
       color: #fff;
       border: none;
@@ -104,8 +104,14 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    #randomize:hover, #submit:hover {
+    #randomize:hover, #submit:hover, #reveal-answer:hover {
       background: #0056b3;
+    }
+    #reveal-answer {
+      background: #6c757d;
+    }
+    #reveal-answer:hover {
+      background: #545b62;
     }
     #feedback {
       margin-top: 16px;
@@ -153,6 +159,7 @@
     <div id="abc-readout" style="margin-bottom: 12px; font-size: 1.08em; color: #007bff; text-align: center;"></div>
     <div style="margin-bottom: 10px;">
       <button id="randomize">Randomize</button>
+      <button id="reveal-answer" class="hidden">Reveal Answer</button>
     </div>
     <form id="guess-form" autocomplete="off">
       <div id="coordinate-inputs" class="inputs hidden">
@@ -209,6 +216,8 @@
     let studentD, studentE, studentF;
     let pointA, pointB, correctMidpoint; // For number line mode
     let currentMode = 'number-line';
+    let answersRevealed = false;
+    let allCorrect = false;
     // --- Canvas setup ---
     const canvas = document.getElementById('graph');
     const ctx = canvas.getContext('2d');
@@ -248,6 +257,10 @@
     }
     // --- Randomize problem ---
     function randomizeProblem() {
+      // Reset flags
+      answersRevealed = false;
+      allCorrect = false;
+      
       if (currentMode === 'number-line') {
         randomizeNumberLineProblem();
       } else {
@@ -419,6 +432,35 @@
       drawPoint(A, 'A', '#007bff');
       drawPoint(B, 'B', '#007bff');
       drawPoint(C, 'C', '#007bff');
+      
+      // Draw line segments between A, B, and C
+      ctx.strokeStyle = '#007bff';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      
+      // Draw segment AB
+      const [ax, ay] = toCanvas(A);
+      const [bx, by] = toCanvas(B);
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+      
+      // Draw segment BC
+      const [cx, cy] = toCanvas(C);
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.lineTo(cx, cy);
+      ctx.stroke();
+      
+      // Draw segment AC
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(cx, cy);
+      ctx.stroke();
+      
+      ctx.globalAlpha = 1.0;
+      
       // Draw student guesses if present
       if(studentD) {
         drawPoint(studentD, 'D', pointsEqual(studentD,D)?'#28a745':'#dc3545', true);
@@ -428,6 +470,36 @@
       }
       if(studentF) {
         drawPoint(studentF, 'F', pointsEqual(studentF,F)?'#28a745':'#dc3545', true);
+      }
+      
+      // Draw segments between D, E, F if all answers are correct
+      if(allCorrect && studentD && studentE && studentF) {
+        ctx.strokeStyle = '#28a745';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.6;
+        
+        // Draw segment DE
+        const [dx, dy] = toCanvas(studentD);
+        const [ex, ey] = toCanvas(studentE);
+        ctx.beginPath();
+        ctx.moveTo(dx, dy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+        
+        // Draw segment EF
+        const [fx, fy] = toCanvas(studentF);
+        ctx.beginPath();
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(fx, fy);
+        ctx.stroke();
+        
+        // Draw segment DF
+        ctx.beginPath();
+        ctx.moveTo(dx, dy);
+        ctx.lineTo(fx, fy);
+        ctx.stroke();
+        
+        ctx.globalAlpha = 1.0;
       }
     }
     function drawPoint([x,y], label, color, isGuess) {
@@ -467,6 +539,7 @@
           document.getElementById(id).value = '';
         });
         studentD = studentE = studentF = null;
+        allCorrect = false;
       }
     }
     function updateABCReadout() {
@@ -504,6 +577,9 @@
         ['dx', 'dy', 'ex', 'ey', 'fx', 'fy'].forEach(id => {
           document.getElementById(id).removeAttribute('required');
         });
+        
+        // Hide reveal answer button in number line mode
+        document.getElementById('reveal-answer').classList.add('hidden');
       } else {
         numberLineElements.forEach(id => document.getElementById(id).classList.add('hidden'));
         coordinateElements.forEach(id => document.getElementById(id).classList.remove('hidden'));
@@ -512,6 +588,9 @@
         ['dx', 'dy', 'ex', 'ey', 'fx', 'fy'].forEach(id => {
           document.getElementById(id).setAttribute('required', '');
         });
+        
+        // Show reveal answer button in coordinate plane mode
+        document.getElementById('reveal-answer').classList.remove('hidden');
       }
       
       // Randomize problem for new mode
@@ -521,6 +600,17 @@
       switchMode(this.value);
     };
     document.getElementById('randomize').onclick = randomizeProblem;
+    document.getElementById('reveal-answer').onclick = function() {
+      if (currentMode === 'coordinate-plane') {
+        answersRevealed = true;
+        studentD = D;
+        studentE = E;
+        studentF = F;
+        allCorrect = true; // Set this to true so segments will be drawn
+        draw();
+        document.getElementById('feedback').innerHTML = '<span class="incorrect">Answers revealed. D: (' + formatCoord(D[0]) + ', ' + formatCoord(D[1]) + '), E: (' + formatCoord(E[0]) + ', ' + formatCoord(E[1]) + '), F: (' + formatCoord(F[0]) + ', ' + formatCoord(F[1]) + ')</span>';
+      }
+    };
     document.getElementById('submit').onclick = function(e) {
       e.preventDefault();
       console.log('Submit button clicked, current mode:', currentMode);
@@ -659,12 +749,14 @@
       let msg = '';
       if(correctD && correctE && correctF) {
         msg = '<span class="correct">All correct! Well done!</span>';
+        allCorrect = true;
       } else {
         msg = '<span class="incorrect">';
         msg += 'D: ' + (correctD ? '✔️' : '❌') + ' ';
         msg += 'E: ' + (correctE ? '✔️' : '❌') + ' ';
         msg += 'F: ' + (correctF ? '✔️' : '❌');
         msg += '</span>';
+        allCorrect = false;
       }
       document.getElementById('feedback').innerHTML = msg;
     }
