@@ -182,11 +182,9 @@
             <button id="newProblem">New Problem</button>
             <button id="checkAnswer">Check Answer</button>
             <button id="tryAgain" style="display: none;">Try Again</button>
-            <button id="showHint">Show Hint</button>
         </div>
         
         <div id="feedback"></div>
-        <div id="hint" class="hint" style="display: none;"></div>
     </div>
 
     <script>
@@ -221,10 +219,11 @@
                     y = Math.min(y, triangleY);
                 }
                 
-                // Rectangle above the line (centered at x = 5, width = 2, height = 3)
+                // Second triangular spike above the line (centered at x = 5, base width = 2, height = 3)
                 if (x >= 4 && x <= 6) {
-                    const rectangleY = 1 + 3;
-                    y = Math.max(y, rectangleY);
+                    const dx = Math.abs(x - 5);
+                    const triangleY = 1 + 3 * (1 - dx);
+                    y = Math.max(y, triangleY);
                 }
                 
                 return y;
@@ -252,6 +251,7 @@
         function drawGrid(ctx, canvas) {
             ctx.strokeStyle = '#ddd';
             ctx.lineWidth = 1;
+            ctx.setLineDash([]); // Reset to solid lines
             
             // Vertical grid lines
             for (let x = -10; x <= 10; x += 2) {
@@ -325,9 +325,9 @@
         }
 
         // Draw function
-        function drawFunction(ctx, canvas, func, color = '#007bff', dashed = false) {
+        function drawFunction(ctx, canvas, func, color = '#007bff', dashed = false, bold = false) {
             ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
+            ctx.lineWidth = bold ? 6 : 3;
             if (dashed) {
                 ctx.setLineDash([10, 5]);
             } else {
@@ -386,7 +386,6 @@
             document.getElementById('h').value = '';
             document.getElementById('k').value = '';
             document.getElementById('feedback').textContent = '';
-            document.getElementById('hint').style.display = 'none';
             document.getElementById('tryAgain').style.display = 'none';
             showingStudentAnswer = false;
             
@@ -404,7 +403,7 @@
             // Clear and draw transformed graph
             transformedCtx.clearRect(0, 0, transformedCanvas.width, transformedCanvas.height);
             drawGrid(transformedCtx, transformedCanvas);
-            drawFunction(transformedCtx, transformedCanvas, transformedFunction, '#dc3545');
+            drawFunction(transformedCtx, transformedCanvas, transformedFunction, '#51cf66', false, false);
         }
 
         // Check answer
@@ -428,12 +427,13 @@
                 document.getElementById('feedback').className = 'correct';
                 document.getElementById('tryAgain').style.display = 'none';
                 showingStudentAnswer = false;
+                
+                // Show bold green graph when correct
+                transformedCtx.clearRect(0, 0, transformedCanvas.width, transformedCanvas.height);
+                drawGrid(transformedCtx, transformedCanvas);
+                drawFunction(transformedCtx, transformedCanvas, transformedFunction, '#51cf66', false, true);
             } else {
-                let feedback = 'Incorrect. ';
-                if (!aCorrect) feedback += `a should be ${currentA}. `;
-                if (!hCorrect) feedback += `h should be ${currentH}. `;
-                if (!kCorrect) feedback += `k should be ${currentK}.`;
-                document.getElementById('feedback').textContent = feedback;
+                document.getElementById('feedback').textContent = 'Incorrect. Try again!';
                 document.getElementById('feedback').className = 'incorrect';
                 
                 // Show student's answer overlaid on the right graph
@@ -452,8 +452,8 @@
             transformedCtx.clearRect(0, 0, transformedCanvas.width, transformedCanvas.height);
             drawGrid(transformedCtx, transformedCanvas);
             
-            // Draw correct answer (blue)
-            drawFunction(transformedCtx, transformedCanvas, transformedFunction, '#007bff');
+            // Draw correct answer (green)
+            drawFunction(transformedCtx, transformedCanvas, transformedFunction, '#51cf66');
             
             // Draw student's answer (red dashed line)
             drawFunction(transformedCtx, transformedCanvas, studentFunction, '#ff6b6b', true);
@@ -463,34 +463,7 @@
             showingStudentAnswer = true;
         }
 
-        // Show hint
-        function showHint() {
-            const hint = document.getElementById('hint');
-            hint.style.display = 'block';
-            
-            let hintText = 'Hints: ';
-            if (currentA > 1) {
-                hintText += 'The graph is vertically stretched. ';
-            } else if (currentA < 1 && currentA > 0) {
-                hintText += 'The graph is vertically compressed. ';
-            } else if (currentA < 0) {
-                hintText += 'The graph is reflected over the x-axis. ';
-            }
-            
-            if (currentH > 0) {
-                hintText += `The graph is shifted right by ${currentH} units. `;
-            } else if (currentH < 0) {
-                hintText += `The graph is shifted left by ${Math.abs(currentH)} units. `;
-            }
-            
-            if (currentK > 0) {
-                hintText += `The graph is shifted up by ${currentK} units.`;
-            } else if (currentK < 0) {
-                hintText += `The graph is shifted down by ${Math.abs(currentK)} units.`;
-            }
-            
-            hint.textContent = hintText;
-        }
+
 
         // Try again function
         function tryAgain() {
@@ -499,7 +472,6 @@
             document.getElementById('h').value = '';
             document.getElementById('k').value = '';
             document.getElementById('feedback').textContent = '';
-            document.getElementById('hint').style.display = 'none';
             document.getElementById('tryAgain').style.display = 'none';
             
             // Redraw the right graph with only the correct answer
@@ -511,7 +483,6 @@
         document.getElementById('newProblem').addEventListener('click', generateNewProblem);
         document.getElementById('checkAnswer').addEventListener('click', checkAnswer);
         document.getElementById('tryAgain').addEventListener('click', tryAgain);
-        document.getElementById('showHint').addEventListener('click', showHint);
 
         // Allow Enter key to submit
         document.addEventListener('keypress', function(e) {
